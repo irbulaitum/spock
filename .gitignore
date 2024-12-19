@@ -1,0 +1,7 @@
+.*
+!/.gitignore
+/.gradle/
+/allure-results/
+/build/
+/.idea/
+/tmp/*

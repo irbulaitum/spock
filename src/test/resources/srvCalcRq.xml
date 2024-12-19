@@ -1,0 +1,6 @@
+<calc>
+    <rquid>${rquid}</rquid>
+    <rqtm>${rqtm}</rqtm>
+    <a>${a}</a>
+    <b>${b}</b>
+</calc>

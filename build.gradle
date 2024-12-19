@@ -10,11 +10,30 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.groovy:groovy:4.0.14'
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation(platform("org.apache.groovy:groovy-bom:4.0.24"))
+    implementation("org.apache.groovy:groovy")
+    implementation("org.apache.groovy:groovy-templates:4.0.24")
+    implementation("org.apache.groovy:groovy-datetime:4.0.24")
+
+    //spock
+    testImplementation(platform("org.spockframework:spock-bom:2.3-groovy-4.0"))
+    testImplementation("org.spockframework:spock-core")
+    //rest-assured
+    testImplementation("io.rest-assured:xml-path:5.4.0")
+    testImplementation("io.rest-assured:json-path:5.4.0")
+    testImplementation("io.rest-assured:rest-assured:5.4.0")
+    testImplementation("io.rest-assured:rest-assured-common:5.4.0")
+    //geb
+    //testImplementation("org.gebish:geb-spock:0.12.2")
+    testImplementation("org.seleniumhq.selenium:selenium-chrome-driver:4.17.0")
+    testImplementation("org.seleniumhq.selenium:selenium-support:4.17.0")
+
 }
 
 test {
     useJUnitPlatform()
+    maxParallelForks(5)
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }

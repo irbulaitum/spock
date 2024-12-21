@@ -4,6 +4,7 @@ import spock.lang.Ignore
 import spock.lang.Retry
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Stepwise
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -13,6 +14,7 @@ import static io.restassured.RestAssured.*
 import groovy.xml.XmlParser
 
 
+@Stepwise
 class srvCalcTest extends Specification{
     @Shared
     def sharedVar = 'Эта переменная доступна во всех тестах спецификации'
@@ -23,6 +25,7 @@ class srvCalcTest extends Specification{
             .setBaseUri("http://127.0.0.1:8080") //Бызовый URI, который будет использоваться для запросов
             .addHeaders("myHeader":"chpok", "Content-Type":"application/xml; charset=UTF-8")
             .build()
+
     //@Ignore
     @Retry
     def "Это тестовый метод"(){

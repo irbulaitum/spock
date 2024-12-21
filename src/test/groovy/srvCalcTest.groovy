@@ -15,7 +15,7 @@ import groovy.xml.XmlParser
 import groovy.sql.Sql
 
 
-@Stepwise
+//@Stepwise
 class srvCalcTest extends Specification{
     @Shared
     def sharedVar = 'Эта переменная доступна во всех тестах спецификации'
@@ -37,7 +37,7 @@ class srvCalcTest extends Specification{
 
 
     //@Ignore
-    @Retry
+    //@Retry(count=3)
     def "Это тестовый метод"(){
         given: //Дано (голая баба лезет в окно)
         def msgParams = [
@@ -46,13 +46,14 @@ class srvCalcTest extends Specification{
                 a: a,
                 b: b
         ]
+        println "$a"
 
         when: //Когда выполняем действие
         def response = given().spec(requestSpec)
                 .when()
                 .body(new StreamingTemplateEngine().createTemplate(new File("src/test/resources/srvCalcRq.xml")).make(msgParams).toString())
                 .post("/srvCalc")
-                .then().log().all()
+                .then()//.log().all()
                 .statusCode(200)
         def CalcRs = new XmlParser().parseText(response.extract().response().asString())
         sql.execute("""insert into confAB
@@ -65,7 +66,7 @@ class srvCalcTest extends Specification{
             assert CalcRs.rquid.text() != ''
             assert CalcRs.rqtm.text() != ''
             assert CalcRs.status.text() == 'OK'
-            assert CalcRs.statusDesc.text() == 'Успешно'
+            assert CalcRs.statusDesc.text() == 'Успешно1'
             assert CalcRs.result.text().toInteger() == a + b
             assert CalcRs.result.text().toInteger() == result
         }
@@ -75,9 +76,11 @@ class srvCalcTest extends Specification{
         1|2|3
         3|3|6
         4|5|9
+        5|6|11
+        6|7|13
     }
 
-
+    //@Ignore
     def "Это еще один тестовый метод"(){
         given:
         def msgParams = [
@@ -110,8 +113,10 @@ class srvCalcTest extends Specification{
         b << [0,9,8,7,6,5,4,3,2,1]
     }
 
+
     static def configFile = new XmlParser().parse("src/test/resources/testConfigurations.xml") //Для кейса ниже нужен Конфигурационный файл
-    @Retry(count = 1)
+    @Retry(count = 1000)
+    //@Ignore
     def "Это метод который берет значения из файла конфигураций"(){
         given:
         def msgParams = [
@@ -142,7 +147,7 @@ class srvCalcTest extends Specification{
 
         where: //Параметры теста
         a << configFile.config.each{}.collect{it.a[0] != null ? it.a.text().toInteger() : 0}
-        b << configFile.config.each{}.collect{it.b[0] != null ? it.a.text().toInteger() : 0}
+        b << configFile.config.each{}.collect{it.b[0] != null ? it.b.text().toInteger() : 0}
     }
 
 
@@ -175,7 +180,7 @@ class srvCalcTest extends Specification{
         }
 
         where: //Параметры теста
-        [a,b] << sql.rows("Select a, b from confAB")
+        [a, b] << sql.rows("Select a, b from confAB")
 
     }
 }

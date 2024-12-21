@@ -39,7 +39,7 @@ class srvCalcTest extends Specification{
     //@Ignore
     //@Retry(count=3)
     def "Это тестовый метод"(){
-        given: //Дано (голая баба лезет в окно)
+        given: //Дано
         def msgParams = [
                 rquid: UUID.randomUUID().toString().replace("-",""),
                 rqtm: LocalDateTime.now().format("yyyy-MM-dd'T'HH:mm:ss+03:00"),

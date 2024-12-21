@@ -1,0 +1,18 @@
+<configurations>
+    <config>
+        <a>10</a>
+        <b>20</b>
+    </config>
+
+    <config>
+        <a>30</a>
+        <b>40</b>
+    </config>
+
+    <config>
+        <a>50</a>
+        <b>60</b>
+    </config>
+
+
+</configurations>

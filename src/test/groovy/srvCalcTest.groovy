@@ -61,7 +61,7 @@ class srvCalcTest extends Specification{
     }
 
     def "Это еще один тестовый метод"(){
-        given: //Дано (голая баба лезет в окно)
+        given:
         def msgParams = [
                 rquid: UUID.randomUUID().toString().replace("-",""),
                 rqtm: LocalDateTime.now().format("yyyy-MM-dd'T'HH:mm:ss+03:00"),
@@ -90,5 +90,40 @@ class srvCalcTest extends Specification{
         where: //Параметры теста
         a << [1,2,3,4,5,6,7,8,9,0]
         b << [0,9,8,7,6,5,4,3,2,1]
+    }
+
+    static def configFile = new XmlParser().parse("src/test/resources/testConfigurations.xml") //Для кейса ниже нужен Конфигурационный файл
+    @Retry(count = 1)
+    def "Это метод который берет значения из файла конфигураций"(){
+        given:
+        def msgParams = [
+                rquid: UUID.randomUUID().toString().replace("-",""),
+                rqtm: LocalDateTime.now().format("yyyy-MM-dd'T'HH:mm:ss+03:00"),
+                a: a,
+                b: b
+        ]
+        println "Значения a: $a b: $b"
+
+        expect: //Здесь мы объединили when - then
+        def response = given().spec(requestSpec)
+                .when()
+                .body(new StreamingTemplateEngine().createTemplate(new File("src/test/resources/srvCalcRq.xml")).make(msgParams).toString())
+                .post("/srvCalc")
+                .then()//.log().all()
+                .statusCode(200)
+        def CalcRs = new XmlParser().parseText(response.extract().response().asString())
+
+        verifyAll {
+            assert CalcRs.rquid.text() != ''
+            assert CalcRs.rqtm.text() != ''
+            assert CalcRs.status.text() == 'OK'
+            assert CalcRs.statusDesc.text() == 'Успешно'
+            assert CalcRs.result.text().toInteger() == a + b
+            //assert CalcRs.result.text().toInteger() == result
+        }
+
+        where: //Параметры теста
+        a << configFile.config.each{}.collect{it.a[0] != null ? it.a.text().toInteger() : 0}
+        b << configFile.config.each{}.collect{it.b[0] != null ? it.a.text().toInteger() : 0}
     }
 }

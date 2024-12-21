@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter
 
 import static io.restassured.RestAssured.*
 import groovy.xml.XmlParser
+import groovy.sql.Sql
 
 
 @Stepwise
@@ -25,6 +26,15 @@ class srvCalcTest extends Specification{
             .setBaseUri("http://127.0.0.1:8080") //Бызовый URI, который будет использоваться для запросов
             .addHeaders("myHeader":"chpok", "Content-Type":"application/xml; charset=UTF-8")
             .build()
+    @Shared
+    def sql = Sql.newInstance("jdbc:h2:mem:;DATABASE_TO_UPPER=false;", "org.h2.Driver")
+            .with {
+                it.execute("""create table confAB (
+                                RqUID VARCHAR primary key, a VARCHAR, b VARCHAR, result VARCHAR
+                                )""")
+                it
+            }
+
 
     //@Ignore
     @Retry
@@ -45,6 +55,10 @@ class srvCalcTest extends Specification{
                 .then().log().all()
                 .statusCode(200)
         def CalcRs = new XmlParser().parseText(response.extract().response().asString())
+        sql.execute("""insert into confAB
+                    (RqUID, a, b, result)
+                    values (${CalcRs.rquid.text()}, $a, $b, ${CalcRs.result.text()}
+                    )""")
 
         then: //Тогда ожидаем следующий результат
         verifyAll {
@@ -62,6 +76,7 @@ class srvCalcTest extends Specification{
         3|3|6
         4|5|9
     }
+
 
     def "Это еще один тестовый метод"(){
         given:
@@ -128,5 +143,39 @@ class srvCalcTest extends Specification{
         where: //Параметры теста
         a << configFile.config.each{}.collect{it.a[0] != null ? it.a.text().toInteger() : 0}
         b << configFile.config.each{}.collect{it.b[0] != null ? it.a.text().toInteger() : 0}
+    }
+
+
+    def "Это метод который берет значения из базы данных"(){
+        given:
+        def msgParams = [
+                rquid: UUID.randomUUID().toString().replace("-",""),
+                rqtm: LocalDateTime.now().format("yyyy-MM-dd'T'HH:mm:ss+03:00"),
+                a: a,
+                b: b
+        ]
+        println "Значения a: $a b: $b"
+
+        expect: //Здесь мы объединили when - then
+        def response = given().spec(requestSpec)
+                .when()
+                .body(new StreamingTemplateEngine().createTemplate(new File("src/test/resources/srvCalcRq.xml")).make(msgParams).toString())
+                .post("/srvCalc")
+                .then()//.log().all()
+                .statusCode(200)
+        def CalcRs = new XmlParser().parseText(response.extract().response().asString())
+
+        verifyAll {
+            assert CalcRs.rquid.text() != ''
+            assert CalcRs.rqtm.text() != ''
+            assert CalcRs.status.text() == 'OK'
+            assert CalcRs.statusDesc.text() == 'Успешно'
+            assert CalcRs.result.text().toInteger() == a.toInteger() + b.toInteger()
+            //assert CalcRs.result.text().toInteger() == result
+        }
+
+        where: //Параметры теста
+        [a,b] << sql.rows("Select a, b from confAB")
+
     }
 }

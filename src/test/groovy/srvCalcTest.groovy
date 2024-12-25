@@ -66,7 +66,7 @@ class srvCalcTest extends Specification{
             assert CalcRs.rquid.text() != ''
             assert CalcRs.rqtm.text() != ''
             assert CalcRs.status.text() == 'OK'
-            assert CalcRs.statusDesc.text() == 'Успешно1'
+            assert CalcRs.statusDesc.text() == 'Успешно'
             assert CalcRs.result.text().toInteger() == a + b
             assert CalcRs.result.text().toInteger() == result
         }

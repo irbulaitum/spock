@@ -115,7 +115,7 @@ class srvCalcTest extends Specification{
 
 
     static def configFile = new XmlParser().parse("src/test/resources/testConfigurations.xml") //Для кейса ниже нужен Конфигурационный файл
-    @Retry(count = 1000)
+    //@Retry(count = 1000)
     //@Ignore
     def "Это метод который берет значения из файла конфигураций"(){
         given:

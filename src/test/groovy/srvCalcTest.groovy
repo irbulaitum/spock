@@ -23,7 +23,7 @@ class srvCalcTest extends Specification{
     //Спецификация включающая параметры SSL, базовый uri и т.д.
     def requestSpec = new RequestSpecBuilder()
             .setConfig(httpConf.config) //это конфиг с параметрами подключения
-            .setBaseUri("http://127.0.0.1:8080") //Бызовый URI, который будет использоваться для запросов
+            .setBaseUri("http://127.0.0.1:8083") //Бызовый URI, который будет использоваться для запросов
             .addHeaders("myHeader":"chpok", "Content-Type":"application/xml; charset=UTF-8")
             .build()
     @Shared
